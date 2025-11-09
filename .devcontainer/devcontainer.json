@@ -1,0 +1,75 @@
+{
+  "name": "Go Chat App Development",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+
+  // Container settings
+  "runArgs": [
+    "--name=go-chat-dev"
+  ],
+
+  // VSCode settings
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "go.toolsManagement.checkForUpdates": "local",
+        "go.useLanguageServer": true,
+        "go.gopath": "/go",
+        "go.goroot": "/usr/local/go",
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": [
+        "golang.go",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens",
+        "github.copilot"
+      ]
+    }
+  },
+
+  // Port forwarding for the chat app
+  "forwardPorts": [8080, 3000],
+  "portsAttributes": {
+    "8080": {
+      "label": "Chat Application",
+      "onAutoForward": "notify"
+    },
+    "3000": {
+      "label": "Development Server",
+      "onAutoForward": "notify"
+    }
+  },
+
+  // Post-create commands
+  "postCreateCommand": "go version && git config --global --add safe.directory /workspaces/go_chat_app",
+
+  // Features
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": false,
+      "username": "vscode",
+      "userUid": "1000",
+      "userGid": "1000"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
+  },
+
+  // Mount points
+  "mounts": [
+    "source=${localWorkspaceFolder}/.git,target=/workspaces/go_chat_app/.git,type=bind,consistency=cached"
+  ],
+
+  // Remote user
+  "remoteUser": "vscode",
+
+  // Environment variables
+  "remoteEnv": {
+    "GO111MODULE": "on",
+    "GOPROXY": "https://proxy.golang.org,direct"
+  }
+}
