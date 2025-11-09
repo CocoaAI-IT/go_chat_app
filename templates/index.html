@@ -3,40 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Go Chat App</title>
+    <title>Go Chat App - ニコニコ風チャット</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <div class="container">
+        <!-- ヘッダー -->
         <div class="header">
             <h1>Go Chat App</h1>
+            <div class="header-subtitle">ニコニコ風チャット</div>
         </div>
 
-        <!-- ユーザー名入力エリア -->
-        <div id="login-area" class="login-area">
-            <div class="login-box">
-                <h2>チャットに参加</h2>
-                <input type="text" id="username-input" placeholder="ユーザー名を入力してください" maxlength="20">
-                <button id="join-btn">参加する</button>
+        <!-- 1. ニックネーム登録画面 -->
+        <div id="nickname-screen" class="screen active">
+            <div class="screen-content">
+                <h2>ニックネーム登録</h2>
+                <p class="screen-description">チャットで使用するニックネームを入力してください</p>
+
+                <div class="input-group">
+                    <input type="text"
+                           id="nickname-input"
+                           placeholder="ニックネーム（最大20文字）"
+                           maxlength="20"
+                           autocomplete="off">
+                    <button id="nickname-submit-btn" class="primary-btn">登録してロビーへ</button>
+                </div>
+
+                <div id="nickname-error" class="error-message"></div>
             </div>
         </div>
 
-        <!-- チャットエリア -->
-        <div id="chat-area" class="chat-area" style="display: none;">
-            <div class="chat-info">
-                <span id="current-username"></span>としてログイン中
-            </div>
+        <!-- 2. ロビー画面 -->
+        <div id="lobby-screen" class="screen">
+            <div class="screen-content">
+                <div class="lobby-header">
+                    <h2>ロビー</h2>
+                    <div class="user-info">
+                        ようこそ、<span id="current-nickname" class="nickname-display"></span>さん
+                    </div>
+                </div>
 
-            <div id="messages" class="messages"></div>
+                <div class="lobby-main">
+                    <!-- ユーザーリスト -->
+                    <div class="user-lists">
+                        <div class="user-list-section">
+                            <h3>現在ロビーにいる人 (<span id="lobby-count">0</span>人)</h3>
+                            <div id="lobby-users" class="user-list"></div>
+                        </div>
 
-            <div class="input-area">
-                <input type="text" id="message-input" placeholder="メッセージを入力..." maxlength="500">
-                <button id="send-btn">送信</button>
+                        <div class="user-list-section">
+                            <h3>全オンラインユーザー (<span id="total-count">0</span>人)</h3>
+                            <div id="all-users" class="user-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- 部屋参加 -->
+                    <div class="room-join-section">
+                        <h3>部屋に参加</h3>
+                        <p class="section-description">合言葉を入力して部屋に入ります</p>
+
+                        <div class="input-group">
+                            <input type="text"
+                                   id="password-input"
+                                   placeholder="合言葉を入力"
+                                   autocomplete="off">
+                            <button id="room-join-btn" class="primary-btn">部屋に入る</button>
+                        </div>
+
+                        <div id="room-join-error" class="error-message"></div>
+                    </div>
+                </div>
+
+                <div class="lobby-footer">
+                    <button id="lobby-leave-btn" class="secondary-btn">ニックネーム登録画面へ戻る</button>
+                </div>
             </div>
         </div>
 
-        <div class="footer">
-            <p>Powered by Go + WebSocket</p>
+        <!-- 3. 部屋画面 -->
+        <div id="room-screen" class="screen">
+            <div class="screen-content room-layout">
+                <div class="room-header">
+                    <div class="room-info">
+                        <h2>チャットルーム</h2>
+                        <div class="room-user-count">
+                            参加者: <span id="room-user-count">0</span>/10人
+                        </div>
+                    </div>
+                    <button id="room-leave-btn" class="secondary-btn">ロビーに戻る</button>
+                </div>
+
+                <div class="room-main">
+                    <!-- ニコニコ風コメント表示エリア -->
+                    <div class="comment-display-area" id="comment-display">
+                        <!-- 5つのレーン -->
+                        <div class="comment-lane" data-lane="0"></div>
+                        <div class="comment-lane" data-lane="1"></div>
+                        <div class="comment-lane" data-lane="2"></div>
+                        <div class="comment-lane" data-lane="3"></div>
+                        <div class="comment-lane" data-lane="4"></div>
+                    </div>
+
+                    <!-- サイドバー（ログ＋ユーザーリスト） -->
+                    <div class="room-sidebar">
+                        <!-- 部屋のユーザーリスト -->
+                        <div class="room-users-section">
+                            <h3>参加者</h3>
+                            <div id="room-users" class="user-list small"></div>
+                        </div>
+
+                        <!-- ログパネル -->
+                        <div class="log-panel">
+                            <h3>ログ</h3>
+                            <div id="log-messages" class="log-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- コメント入力エリア -->
+                <div class="room-input-area">
+                    <input type="text"
+                           id="comment-input"
+                           placeholder="コメントを入力..."
+                           maxlength="500"
+                           autocomplete="off">
+                    <button id="comment-send-btn" class="primary-btn">送信</button>
+                </div>
+            </div>
         </div>
     </div>
 

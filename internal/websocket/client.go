@@ -1,6 +1,8 @@
 package websocket
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"log"
 	"net/http"
 	"time"
@@ -19,7 +21,7 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	// クライアントから許可される最大メッセージサイズ
-	maxMessageSize = 512
+	maxMessageSize = 8192
 )
 
 var upgrader = websocket.Upgrader{
@@ -32,10 +34,10 @@ var upgrader = websocket.Upgrader{
 
 // Client はWebSocket接続とハブの間の仲介役
 type Client struct {
-	hub      *Hub
-	conn     *websocket.Conn
-	send     chan []byte
-	username string
+	id   string
+	hub  *Hub
+	conn *websocket.Conn
+	send chan []byte
 }
 
 // readPump は WebSocket接続からハブへメッセージを送る
@@ -60,7 +62,11 @@ func (c *Client) readPump() {
 			break
 		}
 
-		c.hub.broadcast <- message
+		// メッセージをハブに送信
+		c.hub.message <- &ClientMessage{
+			client:  c,
+			message: message,
+		}
 	}
 }
 
@@ -115,21 +121,25 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// クエリパラメータからユーザー名を取得
-	username := r.URL.Query().Get("username")
-	if username == "" {
-		username = "匿名ユーザー"
-	}
+	// ユニークなIDを生成
+	id := generateClientID()
 
 	client := &Client{
-		hub:      hub,
-		conn:     conn,
-		send:     make(chan []byte, 256),
-		username: username,
+		id:   id,
+		hub:  hub,
+		conn: conn,
+		send: make(chan []byte, 256),
 	}
 	client.hub.register <- client
 
 	// goroutineで読み書きを実行
 	go client.writePump()
 	go client.readPump()
+}
+
+// generateClientID はクライアントのユニークIDを生成
+func generateClientID() string {
+	bytes := make([]byte, 16)
+	rand.Read(bytes)
+	return hex.EncodeToString(bytes)
 }
